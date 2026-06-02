@@ -2,15 +2,15 @@ FROM php:8.2-apache
 
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
     unzip \
     zip \
+    curl \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev
+    libfreetype6-dev
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 RUN docker-php-ext-install \
     pdo \
@@ -24,12 +24,10 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-RUN a2enmod rewrite
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
 
-CMD php -S 0.0.0.0:$PORT -t public
+CMD php -S 0.0.0.0:${PORT:-80} -t public
